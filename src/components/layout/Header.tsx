@@ -10,6 +10,7 @@ interface HeaderProps {
   onOpenAuth: () => void;
   onOpenFeedback: () => void;
   onOpenWorkspace: () => void;
+  onOpenAiAssistant?: () => void;
   currentUser: UserProfile | null;
   currentPath: string;
 }
@@ -20,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenFeedback,
   onOpenWorkspace,
+  onOpenAiAssistant,
   currentUser,
   currentPath,
 }) => {
@@ -124,6 +126,19 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Icon name="Shield" size={14} className="text-hps-accent" />
                 <span>Admin</span>
+              </button>
+            )}
+
+            {/* HPS AI Assistant */}
+            {onOpenAiAssistant && (
+              <button
+                onClick={onOpenAiAssistant}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-hps-primary/40 bg-hps-primary/10 hover:bg-hps-primary hover:text-white text-hps-primary transition-all shadow-2xs group cursor-pointer"
+                title="HPS AI Assistant — Convert files & fulfill tool tasks"
+                aria-label="Open AI Assistant"
+              >
+                <Icon name="Sparkles" size={15} className="text-hps-accent group-hover:text-white transition-colors animate-pulse" />
+                <span className="hidden sm:inline">AI Assistant</span>
               </button>
             )}
 
@@ -260,6 +275,19 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <Icon name="Shield" size={16} />
                     <span>Admin Control Dashboard</span>
+                  </button>
+                )}
+
+                {onOpenAiAssistant && (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenAiAssistant();
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-hps-bg text-left text-hps-primary font-bold"
+                  >
+                    <Icon name="Sparkles" size={16} className="text-hps-accent" />
+                    <span>HPS AI Assistant (Convert & Help)</span>
                   </button>
                 )}
               </div>

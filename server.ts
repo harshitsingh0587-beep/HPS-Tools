@@ -3,12 +3,27 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import crypto from 'node:crypto';
 import dotenv from 'dotenv';
+import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 const HOST = '0.0.0.0';
+
+// Gemini AI client initialization
+const geminiApiKey = process.env.GEMINI_API_KEY;
+let aiClient: GoogleGenAI | null = null;
+if (geminiApiKey) {
+  aiClient = new GoogleGenAI({
+    apiKey: geminiApiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      },
+    },
+  });
+}
 
 app.use(express.json());
 
@@ -362,6 +377,168 @@ app.delete('/api/user/work/:id', authenticateUser, (req: Request, res: Response)
   }
   res.json({ success: true });
 });
+
+// 11. Project Folder Download Endpoints
+app.get('/api/download/project-zip', (_req: Request, res: Response) => {
+  const filePath = path.resolve('public/hps-tools-project.zip');
+  res.download(filePath, 'hps-tools-project.zip');
+});
+
+app.get('/api/download/project-tar', (_req: Request, res: Response) => {
+  const filePath = path.resolve('public/hps-tools-project.tar.gz');
+  res.download(filePath, 'hps-tools-project.tar.gz');
+});
+
+// Helper for intelligent intent recognition when offline or API key is not ready
+function generateSmartFallbackReply(userMsg: string): string {
+  const lower = userMsg.toLowerCase().trim();
+
+  if (lower.includes('pdf to image') || lower.includes('pdf to png') || lower.includes('pdf to jpg') || (lower.includes('convert') && lower.includes('pdf'))) {
+    return `### 📄 Convert PDF to Image\nI can help you convert your PDF documents into high-resolution PNG or JPG images!
+- **How to do it directly:** You can drop or attach your PDF file right here in this assistant, or open the **PDF to Image Tool** (/tools/pdf-to-image).
+- **Quality:** Renders crisp, print-ready pages at 300 DPI without uploading to any remote servers.
+- **Privacy:** 100% processed in your browser.`;
+  }
+
+  if (lower.includes('jpg to png') || lower.includes('png to jpg') || (lower.includes('convert') && lower.includes('image'))) {
+    return `### 🖼️ Image Format Converter\nI can transcode images instantly:
+- **JPG to PNG:** Preserves highest visual detail and creates lossless PNG output.
+- **PNG to JPG:** Replaces transparency with crisp white background and optimizes compression.
+- You can attach your image right here or open **JPG to PNG** (/tools/jpg-to-png).`;
+  }
+
+  if (lower.includes('passport') || lower.includes('photo')) {
+    return `### 📷 Passport Photo Maker\nCreate biometric passport photos that meet official global standards:
+- **Dimensions:** Standard 2×2 inches (51×51 mm) or 35×45 mm at 300 DPI (600×600 px).
+- **Features:** Live circular guideline, head-to-chin proportion ruler, background fill, and multi-photo printable grid.
+- Launch the **Passport Photo Maker** (/tools/passport-photo-maker) to begin!`;
+  }
+
+  if (lower.includes('loan') || lower.includes('emi') || lower.includes('mortgage') || lower.includes('interest')) {
+    return `### 📊 Loan & EMI Calculator\nPlan your loan repayments accurately:
+- Calculates exact Monthly EMI, Total Interest Payable, and Total Repayment amount.
+- Provides a full year-by-year amortization breakdown.
+- Open the **Loan Calculator** (/tools/loan-calculator) to test loan amounts and interest rates.`;
+  }
+
+  if (lower.includes('age') || lower.includes('dob') || lower.includes('birthday') || lower.includes('born')) {
+    return `### 🎂 Date of Birth Calculator\nCalculate precise age down to the day:
+- Computes exact years, months, weeks, days, and hours lived.
+- Shows total days until your next birthday and day of the week you were born.
+- Open the **Date of Birth Calculator** (/tools/dob-calculator) to check.`;
+  }
+
+  if (lower.includes('password') || lower.includes('generate')) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*()_+';
+    let pwd = '';
+    for (let i = 0; i < 16; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `### 🔑 Secure Password Generator\nHere is a freshly generated 16-character high-entropy password for you:\n\`${pwd}\`\n\nNeed more custom options (symbols, length, pronounceable)? Open the **Password Generator** (/tools/password-generator).`;
+  }
+
+  if (lower.includes('word') || lower.includes('count') || lower.includes('character')) {
+    return `### 📝 Live Word & Character Counter\nAnalyze any text instantly:
+- Live word count, character count (with/without spaces), sentence count, and reading time estimate.
+- Open the **Word Counter** (/tools/word-counter) or paste your text here to analyze.`;
+  }
+
+  if (lower.includes('resize') || lower.includes('dimension') || lower.includes('scale')) {
+    return `### 📐 Image Resizer\nResize your images with pixel-perfect accuracy:
+- Set custom width and height, lock aspect ratio, or scale by percentage (25%, 50%, 75%).
+- Instant client-side download without watermarks.
+- Open the **Image Resizer** (/tools/image-resizer) to resize your pictures.`;
+  }
+
+  return `### 👋 Welcome to HPS AI Assistant!
+I am your intelligent utility assistant created by **Harshit** (\`harshit.hub\`) for **HPS Tools**.
+
+How can I fulfill your work today?
+- **Convert PDF to Image:** Convert PDF files to high-resolution PNG/JPG.
+- **Format Transcoding:** Convert JPG to PNG, PNG to JPG, Word to PDF, Image to PDF.
+- **Passport Photo Maker:** Crop compliant biometric photos for passports and visas.
+- **Image Resizer:** Resize and optimize pictures.
+- **Calculators:** Compute Loans, Mortgage EMI, Exact Age & DOB, or scientific math.
+- **Productivity:** Generate secure passwords and analyze word counts.
+
+Ask me anything or attach a file to get started!`;
+}
+
+// 12. AI Assistant Chat Endpoint
+app.post('/api/ai/chat', async (req: Request, res: Response) => {
+  const { message, history } = req.body;
+  if (!message || typeof message !== 'string') {
+    res.status(400).json({ error: 'Message is required.' });
+    return;
+  }
+
+  const systemInstruction = `You are HPS AI Assistant, the intelligent utility assistant for HPS Tools (Simple Tools. One Place.), created by Harshit (harshit.hub).
+Your purpose is to directly assist users and fulfill their everyday tasks and tools work.
+Available tools and features in HPS Tools:
+- PDF to Image (/tools/pdf-to-image): Convert PDF documents to high-resolution images
+- Image to PDF (/tools/image-to-pdf): Convert photos and graphics into a compiled PDF
+- Passport Photo Maker (/tools/passport-photo-maker): Generate compliant 2x2 inch biometric passport photos
+- Image Resizer (/tools/image-resizer): Resize dimensions, crop, scale image pixels
+- JPG to PNG (/tools/jpg-to-png) & PNG to JPG (/tools/png-to-jpg): Fast image format transcoding
+- Smart Calculator (/tools/calculator): Math evaluations, trigonometry, algebra
+- Loan Calculator (/tools/loan-calculator): Compute monthly EMI, interest, amortization
+- DOB Calculator (/tools/dob-calculator): Compute exact age, birth milestone, next birthday
+- Unit Converter (/tools/unit-converter): Length, temperature, area, volume, mass, speed
+- Word Counter (/tools/word-counter): Word, character, reading time, sentence analysis
+- Password Generator (/tools/password-generator): Cryptographically secure random passwords
+- Convert All (/tools/convert-all): Universal conversion hub (Word, PowerPoint, PDF, Images)
+
+Guidelines:
+1. Always be concise, polite, helpful, and directly actionable.
+2. If the user asks to convert files (like PDF to image, JPG to PNG, or resize), give clear instructions and recommend clicking the action button or uploading the file into the assistant.
+3. If the user asks for a calculation or conversion (e.g. loan math, unit conversion, age calculation, word count, password), perform the calculation directly and provide the exact answer!
+4. Keep answers clean with markdown formatting.`;
+
+  if (aiClient) {
+    try {
+      const contents: any[] = [];
+      if (Array.isArray(history)) {
+        for (const item of history.slice(-6)) {
+          if (item && item.role && item.content) {
+            contents.push({
+              role: item.role === 'user' ? 'user' : 'model',
+              parts: [{ text: String(item.content) }],
+            });
+          }
+        }
+      }
+      contents.push({
+        role: 'user',
+        parts: [{ text: message }],
+      });
+
+      // Race with a 3.5s timeout for high-speed responsiveness
+      const geminiPromise = aiClient.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents,
+        config: {
+          systemInstruction,
+        },
+      });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Gemini API timeout')), 3500)
+      );
+
+      const response: any = await Promise.race([geminiPromise, timeoutPromise]);
+
+      const replyText = response.text || 'I am ready to help you with HPS Tools!';
+      res.json({ reply: replyText });
+      return;
+    } catch (err: any) {
+      console.warn('Gemini call ended (smart fallback active):', err?.message || err);
+    }
+  }
+
+  const reply = generateSmartFallbackReply(message);
+  res.json({ reply });
+});
+
 
 // --- VITE MIDDLEWARE OR STATIC PRODUCTION ---
 async function startServer() {

@@ -443,6 +443,40 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               )}
             </div>
           </div>
+
+          {/* Project Source Folder & Code Archive Card */}
+          <div className="p-6 rounded-2xl border border-hps-border bg-hps-surface shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-hps-border">
+              <h2 className="text-sm font-bold text-hps-text flex items-center gap-2">
+                <Icon name="Folder" size={16} className="text-emerald-500" />
+                <span>Project Source Folder</span>
+              </h2>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                Export & Archives
+              </span>
+            </div>
+            <p className="text-xs text-hps-muted leading-relaxed">
+              Export and download the complete, clean source code of HPS Tools as a self-contained archive including all 21 tools, configs, tests, and documentation.
+            </p>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <a
+                href="/hps-tools-project.zip"
+                download="hps-tools-project.zip"
+                className="inline-flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-hps-primary text-white text-xs font-bold hover:bg-hps-primary/90 transition-colors shadow-2xs"
+              >
+                <Icon name="Download" size={14} />
+                <span>Download .ZIP</span>
+              </a>
+              <a
+                href="/hps-tools-project.tar.gz"
+                download="hps-tools-project.tar.gz"
+                className="inline-flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-hps-border bg-hps-bg hover:bg-hps-surface text-xs font-bold text-hps-text transition-colors shadow-2xs"
+              >
+                <Icon name="Download" size={14} />
+                <span>Download .TAR.GZ</span>
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* Column 2: Feedback & Ratings Column (7 cols) */}

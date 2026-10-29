@@ -6,12 +6,14 @@ interface FooterProps {
   onNavigate: (path: string) => void;
   onOpenAppearance: () => void;
   onOpenFeedback: () => void;
+  onOpenAiAssistant?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onNavigate,
   onOpenAppearance,
   onOpenFeedback,
+  onOpenAiAssistant,
 }) => {
   return (
     <footer className="w-full border-t border-hps-border bg-hps-surface text-hps-text transition-colors mt-auto">
@@ -118,6 +120,14 @@ export const Footer: React.FC<FooterProps> = ({
               Platform & Info
             </h3>
             <ul className="space-y-2 text-xs text-hps-muted">
+              {onOpenAiAssistant && (
+                <li>
+                  <button onClick={onOpenAiAssistant} className="font-semibold text-hps-primary hover:underline flex items-center gap-1.5 transition-colors">
+                    <Icon name="Sparkles" size={13} className="text-hps-accent" />
+                    <span>HPS AI Assistant</span>
+                  </button>
+                </li>
+              )}
               <li>
                 <button onClick={onOpenAppearance} className="hover:text-hps-text transition-colors">
                   Customize Appearance

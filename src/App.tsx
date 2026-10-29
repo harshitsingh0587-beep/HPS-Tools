@@ -10,6 +10,7 @@ import { ThemeModal } from './components/layout/ThemeModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { FeedbackModal } from './components/feedback/FeedbackModal';
 import { UserWorkspaceModal } from './components/user/UserWorkspaceModal';
+import { AiChatDrawer } from './components/ai/AiChatDrawer';
 import { getSavedTheme, applyThemeToDom } from './themes/themeManager';
 import { getCurrentUser, UserProfile } from './services/auth/authService';
 import { getSiteConfig, SiteConfiguration } from './services/admin/siteConfigService';
@@ -47,6 +48,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
+  const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
 
   const [currentPath, setCurrentPath] = useState<string>(() => {
     return window.location.pathname || '/';
@@ -200,6 +202,7 @@ export default function App() {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenFeedback={() => setIsFeedbackModalOpen(true)}
         onOpenWorkspace={() => setIsWorkspaceModalOpen(true)}
+        onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
         currentUser={currentUser}
         currentPath={currentPath}
       />
@@ -212,6 +215,29 @@ export default function App() {
         onNavigate={handleNavigate}
         onOpenAppearance={() => setIsThemeModalOpen(true)}
         onOpenFeedback={() => setIsFeedbackModalOpen(true)}
+        onOpenAiAssistant={() => setIsAiAssistantOpen(true)}
+      />
+
+      {/* Floating AI Assistant Trigger Bubble */}
+      <button
+        onClick={() => setIsAiAssistantOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-hps-primary text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all border border-hps-accent/40 group cursor-pointer"
+        aria-label="Open AI Assistant"
+        title="Open HPS AI Assistant"
+      >
+        <span className="relative flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-hps-accent opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-hps-accent"></span>
+        </span>
+        <Icon name="Sparkles" size={17} className="text-hps-accent group-hover:rotate-12 transition-transform" />
+        <span className="text-xs font-bold tracking-wide">AI Assistant</span>
+      </button>
+
+      {/* Interactive AI Assistant Drawer */}
+      <AiChatDrawer
+        isOpen={isAiAssistantOpen}
+        onClose={() => setIsAiAssistantOpen(false)}
+        onNavigate={handleNavigate}
       />
 
       {/* Interactive Modals */}
