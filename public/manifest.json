@@ -1,0 +1,17 @@
+{
+  "short_name": "HPS Tools",
+  "name": "HPS Tools — Simple Tools. One Place.",
+  "icons": [
+    {
+      "src": "/icons/hps-logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#142B50",
+  "theme_color": "#142B50",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "description": "Complete utility toolsuite for everyday math, document conversions, media processing, and finance."
+}

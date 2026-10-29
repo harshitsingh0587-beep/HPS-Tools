@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --hps-primary: #142B50;
+  --hps-primary-hover: #0E1F3B;
+  --hps-accent: #D4AF37;
+  --hps-bg: #F8FAFC;
+  --hps-surface: #FFFFFF;
+  --hps-card: #FFFFFF;
+  --hps-text: #0F172A;
+  --hps-muted: #475569;
+  --hps-border: #E2E8F0;
+}
+
+body {
+  background-color: var(--hps-bg);
+  color: var(--hps-text);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Custom utility classes referencing the dynamic theme */
+.bg-hps-bg {
+  background-color: var(--hps-bg);
+}
+
+.bg-hps-surface {
+  background-color: var(--hps-surface);
+}
+
+.bg-hps-card {
+  background-color: var(--hps-card);
+}
+
+.bg-hps-primary {
+  background-color: var(--hps-primary);
+}
+
+.bg-hps-accent {
+  background-color: var(--hps-accent);
+}
+
+.text-hps-primary {
+  color: var(--hps-primary);
+}
+
+.text-hps-accent {
+  color: var(--hps-accent);
+}
+
+.text-hps-text {
+  color: var(--hps-text);
+}
+
+.text-hps-muted {
+  color: var(--hps-muted);
+}
+
+.border-hps-border {
+  border-color: var(--hps-border);
+}
+
+.border-hps-primary {
+  border-color: var(--hps-primary);
+}
+
+.border-hps-accent {
+  border-color: var(--hps-accent);
+}
+
+/* Focus styles for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid var(--hps-accent);
+  outline-offset: 2px;
+}

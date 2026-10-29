@@ -1,0 +1,6 @@
+{
+  "name": "HPS Tools",
+  "description": "Simple Tools. One Place. A comprehensive, client-side utility suite featuring document converters, financial calculators, passport photo creator, image resizer, and everyday productivity tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

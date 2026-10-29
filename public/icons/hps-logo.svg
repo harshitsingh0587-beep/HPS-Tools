@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="hpsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142B50"/>
+      <stop offset="100%" stop-color="#0A1830"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E5AB"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#AA820A"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Outer Rounded Shield/Hexagon Badge -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#hpsGrad)" stroke="url(#goldGrad)" stroke-width="4"/>
+  
+  <!-- Subtle inner grid lines representing precision & utility tools -->
+  <circle cx="64" cy="64" r="42" fill="none" stroke="rgba(212, 175, 55, 0.2)" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <circle cx="64" cy="64" r="28" fill="none" stroke="rgba(212, 175, 55, 0.15)" stroke-width="1.5"/>
+
+  <!-- Utility Cog / Compass Symbol accent on top -->
+  <g transform="translate(64, 34)" filter="url(#shadow)">
+    <!-- Wrench/Gear mini crest -->
+    <path d="M-6,-8 L6,-8 L4,-4 L8,0 L4,4 L6,8 L-6,8 L-4,4 L-8,0 L-4,-4 Z" fill="url(#goldGrad)"/>
+    <circle cx="0" cy="0" r="2.5" fill="#142B50"/>
+  </g>
+
+  <!-- Typography HPS -->
+  <text x="64" y="74" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="34" 
+        font-weight="900" 
+        letter-spacing="1.5"
+        text-anchor="middle" 
+        fill="url(#goldGrad)" 
+        filter="url(#shadow)">
+    HPS
+  </text>
+  
+  <!-- TOOLS Subtext -->
+  <text x="64" y="93" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+        font-size="11" 
+        font-weight="700" 
+        letter-spacing="5" 
+        text-anchor="middle" 
+        fill="#FFFFFF" 
+        opacity="0.95">
+    TOOLS
+  </text>
+  
+  <!-- Bottom Precision Dots -->
+  <circle cx="54" cy="104" r="2" fill="url(#goldGrad)"/>
+  <circle cx="64" cy="104" r="2.5" fill="url(#goldGrad)"/>
+  <circle cx="74" cy="104" r="2" fill="url(#goldGrad)"/>
+</svg>
