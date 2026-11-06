@@ -357,7 +357,7 @@ export const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
             <Icon name="BookOpen" size={14} className="text-hps-accent" />
             <span>Help Desk Guides</span>
             <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-hps-accent/20 text-hps-accent border border-hps-accent/30">
-              8 Guides
+              9 Guides
             </span>
           </button>
         </div>

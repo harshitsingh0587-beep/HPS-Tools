@@ -27,38 +27,39 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   ).slice(0, 3);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
       {/* Breadcrumb & Navigation */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-hps-muted">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-hps-muted overflow-x-auto whitespace-nowrap pb-1">
         <button
           onClick={() => onNavigate('/')}
-          className="hover:text-hps-text transition-colors flex items-center gap-1"
+          className="hover:text-hps-text transition-colors flex items-center gap-1 cursor-pointer"
         >
           <Icon name="Home" size={13} />
           <span>Home</span>
         </button>
-        <Icon name="ChevronRight" size={12} className="opacity-40" />
+        <Icon name="ChevronRight" size={11} className="opacity-40 shrink-0" />
         <span className="font-medium text-hps-muted">{category}</span>
-        <Icon name="ChevronRight" size={12} className="opacity-40" />
-        <span className="font-semibold text-hps-text">{title}</span>
+        <Icon name="ChevronRight" size={11} className="opacity-40 shrink-0" />
+        <span className="font-semibold text-hps-text truncate max-w-[140px] sm:max-w-none">{title}</span>
       </nav>
 
       {/* Workspace Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-hps-border">
-        <div className="flex items-start gap-4">
-          <div className="p-3.5 rounded-2xl bg-hps-primary/10 text-hps-primary border border-hps-primary/20 shrink-0">
-            <Icon name={iconName} size={28} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-hps-border">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-hps-primary/10 text-hps-primary border border-hps-primary/20 shrink-0">
+            <Icon name={iconName} size={22} className="sm:hidden" />
+            <Icon name={iconName} size={28} className="hidden sm:block" />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-hps-text tracking-tight">
+            <div className="flex flex-wrap items-center gap-2 mb-0.5 sm:mb-1">
+              <h1 className="text-xl sm:text-3xl font-extrabold text-hps-text tracking-tight">
                 {title}
               </h1>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border border-hps-border bg-hps-surface text-hps-muted">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full border border-hps-border bg-hps-surface text-hps-muted">
                 {category}
               </span>
             </div>
-            <p className="text-sm text-hps-muted max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-hps-muted max-w-2xl leading-relaxed">
               {description}
             </p>
           </div>
@@ -66,9 +67,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
         <button
           onClick={() => onNavigate('/')}
-          className="self-start sm:self-center flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border border-hps-border bg-hps-surface hover:bg-hps-bg text-hps-text transition-colors shrink-0"
+          className="self-start sm:self-center flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold rounded-xl border border-hps-border bg-hps-surface hover:bg-hps-bg text-hps-text transition-colors shrink-0 cursor-pointer"
         >
-          <Icon name="ArrowLeft" size={14} />
+          <Icon name="ArrowLeft" size={13} />
           <span>All Tools</span>
         </button>
       </div>

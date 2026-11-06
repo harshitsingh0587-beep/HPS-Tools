@@ -89,69 +89,69 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenAppearance
     .filter((t): t is ToolItem => Boolean(t));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-12">
       {/* Hero Section */}
-      <section className="text-center space-y-5 pt-4 pb-2">
+      <section className="text-center space-y-4 sm:space-y-5 pt-2 sm:pt-4 pb-1 sm:pb-2">
         <div className="flex justify-center">
           <Logo size="lg" showTagline={false} />
         </div>
         <div>
-          <h1 className="text-3xl sm:text-5xl font-black text-hps-text tracking-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-hps-text tracking-tight">
             Simple Tools. <span className="text-hps-accent">One Place.</span>
           </h1>
-          <p className="text-sm sm:text-base text-hps-muted max-w-2xl mx-auto mt-2 leading-relaxed">
-            The ultra-fast, professional utility suite. Accurate calculators, genuine document converters, and precision photo tools engineered entirely for client-side privacy.
+          <p className="text-xs sm:text-base text-hps-muted max-w-2xl mx-auto mt-2 leading-relaxed px-2">
+            The ultra-fast, professional utility suite. Accurate calculators, genuine document converters, and precision photo tools engineered for fast local browser execution.
           </p>
         </div>
 
         {/* Global Search Bar */}
-        <div className="max-w-xl mx-auto relative pt-2">
+        <div className="max-w-xl mx-auto relative pt-1 sm:pt-2">
           <Icon
             name="Search"
-            size={18}
-            className="absolute left-4 top-5 text-hps-muted pointer-events-none"
+            size={16}
+            className="absolute left-3.5 sm:left-4 top-4 sm:top-5 text-hps-muted pointer-events-none"
           />
           <input
             type="text"
-            placeholder="Search all tools by name, tag, or function (e.g., PDF to Word, Loan, DOB, Passport)..."
+            placeholder="Search all tools (e.g., Background, PDF, Word, Loan, DOB, Passport)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-hps-border bg-hps-surface text-sm text-hps-text shadow-sm focus:outline-hidden focus:ring-2 focus:ring-hps-primary/30 focus:border-hps-primary"
+            className="w-full pl-10 sm:pl-11 pr-9 sm:pr-10 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl border border-hps-border bg-hps-surface text-xs sm:text-sm text-hps-text shadow-xs focus:outline-hidden focus:ring-2 focus:ring-hps-primary/30 focus:border-hps-primary"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3.5 top-4 p-1 text-hps-muted hover:text-hps-text"
+              className="absolute right-3 top-3.5 sm:top-4 p-1 text-hps-muted hover:text-hps-text"
               aria-label="Clear search query"
             >
-              <Icon name="X" size={16} />
+              <Icon name="X" size={15} />
             </button>
           )}
         </div>
 
         {/* Quick Highlights / Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-hps-muted pt-1">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-[11px] sm:text-xs font-semibold text-hps-muted pt-1">
           <span className="flex items-center gap-1.5">
-            <Icon name="ShieldCheck" size={15} className="text-emerald-500" />
-            100% Client-Side Privacy
+            <Icon name="ShieldCheck" size={14} className="text-emerald-500 shrink-0" />
+            <span>Client-Side File Privacy</span>
           </span>
-          <span>•</span>
+          <span className="text-hps-border hidden xs:inline">•</span>
           <span className="flex items-center gap-1.5">
-            <Icon name="Zap" size={15} className="text-hps-accent" />
-            Instant Processing
+            <Icon name="Zap" size={14} className="text-hps-accent shrink-0" />
+            <span>Instant Processing</span>
           </span>
-          <span>•</span>
+          <span className="text-hps-border hidden xs:inline">•</span>
           <span className="flex items-center gap-1.5">
-            <Icon name="CheckCircle" size={15} className="text-hps-primary" />
-            Zero Server Uploads
+            <Icon name="CheckCircle" size={14} className="text-hps-primary shrink-0" />
+            <span>Local In-Browser Engine</span>
           </span>
-          <span>•</span>
+          <span className="text-hps-border hidden xs:inline">•</span>
           <button
             onClick={onOpenAppearance}
-            className="flex items-center gap-1.5 text-hps-accent hover:underline"
+            className="flex items-center gap-1.5 text-hps-accent hover:underline cursor-pointer"
           >
-            <Icon name="Palette" size={14} />
-            Customize Theme
+            <Icon name="Palette" size={14} className="shrink-0" />
+            <span>Theme</span>
           </button>
         </div>
       </section>
@@ -327,31 +327,31 @@ const ToolCard: React.FC<ToolCardProps> = ({
   return (
     <div
       onClick={onOpen}
-      className="p-5 rounded-2xl border border-hps-border bg-hps-surface hover:border-hps-primary/50 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer relative"
+      className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-hps-border bg-hps-surface hover:border-hps-primary/50 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer relative"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       aria-label={`Open tool: ${tool.name}`}
     >
-      <div className="space-y-3">
+      <div className="space-y-2.5 sm:space-y-3">
         {/* Top line with Icon, Category badge, and Favorite Star */}
         <div className="flex items-center justify-between gap-2">
-          <div className="p-2.5 rounded-xl bg-hps-primary/10 text-hps-primary group-hover:bg-hps-primary group-hover:text-white transition-colors shrink-0">
-            <Icon name={tool.icon} size={20} />
+          <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-hps-primary/10 text-hps-primary group-hover:bg-hps-primary group-hover:text-white transition-colors shrink-0">
+            <Icon name={tool.icon} size={18} />
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border border-hps-border bg-hps-bg text-hps-muted">
+            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md border border-hps-border bg-hps-bg text-hps-muted">
               {tool.category}
             </span>
             <button
               onClick={onToggleFavorite}
-              className="p-1 rounded-md text-hps-muted hover:text-amber-500 transition-colors"
+              className="p-1 rounded-md text-hps-muted hover:text-amber-500 transition-colors cursor-pointer"
               title={isFavorite ? 'Remove from favorites' : 'Pin to favorites'}
               aria-label={isFavorite ? `Unfavorite ${tool.name}` : `Favorite ${tool.name}`}
             >
               <Icon
                 name="Star"
-                size={16}
+                size={15}
                 className={isFavorite ? 'text-amber-500 fill-amber-500' : ''}
               />
             </button>
@@ -360,27 +360,27 @@ const ToolCard: React.FC<ToolCardProps> = ({
 
         {/* Title and Description */}
         <div>
-          <h3 className="text-base font-bold text-hps-text group-hover:text-hps-primary transition-colors">
+          <h3 className="text-sm sm:text-base font-bold text-hps-text group-hover:text-hps-primary transition-colors">
             {tool.name}
           </h3>
-          <p className="text-xs text-hps-muted leading-relaxed mt-1.5 line-clamp-2">
+          <p className="text-[11px] sm:text-xs text-hps-muted leading-relaxed mt-1 sm:mt-1.5 line-clamp-2">
             {tool.description}
           </p>
         </div>
       </div>
 
       {/* Bottom Button */}
-      <div className="pt-4 mt-4 border-t border-hps-border flex items-center justify-between">
-        <span className="text-[11px] text-hps-muted font-medium">Ready in browser</span>
+      <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-hps-border flex items-center justify-between">
+        <span className="text-[10px] sm:text-[11px] text-hps-muted font-medium">Ready in browser</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
             onOpen();
           }}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-hps-border bg-hps-bg hover:bg-hps-primary hover:text-white text-hps-text transition-all flex items-center gap-1.5 shadow-2xs group-hover:border-hps-primary"
+          className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold border border-hps-border bg-hps-bg hover:bg-hps-primary hover:text-white text-hps-text transition-all flex items-center gap-1.5 shadow-2xs group-hover:border-hps-primary cursor-pointer"
         >
           <span>Open Tool</span>
-          <Icon name="ArrowRight" size={13} />
+          <Icon name="ArrowRight" size={12} />
         </button>
       </div>
     </div>

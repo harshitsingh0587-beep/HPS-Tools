@@ -34,6 +34,7 @@ import { DobCalculatorTool } from './tools/dob-calculator/DobCalculatorTool';
 import { LoanCalculatorTool } from './tools/loan-calculator/LoanCalculatorTool';
 import { PassportPhotoTool } from './tools/passport-photo-maker/PassportPhotoTool';
 import { ImageResizerTool } from './tools/image-resizer/ImageResizerTool';
+import { ImageBackgroundChangerTool } from './tools/image-background-changer/ImageBackgroundChangerTool';
 import { ConvertAllHub } from './tools/convert-all/ConvertAllHub';
 import { DocumentConverterWorkspace } from './tools/convert-all/DocumentConverterWorkspace';
 import { CONVERTER_CONFIGS } from './tools/convert-all/converterConfigs';
@@ -142,6 +143,10 @@ export default function App() {
 
     if (path === '/tools/image-resizer') {
       return <ImageResizerTool onNavigate={handleNavigate} />;
+    }
+
+    if (path === '/tools/image-background-changer' || path === '/tools/background-changer') {
+      return <ImageBackgroundChangerTool onNavigate={handleNavigate} />;
     }
 
     if (path === '/tools/convert-all') {

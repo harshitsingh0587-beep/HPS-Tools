@@ -9,6 +9,7 @@ export * from './date-of-birth-calculator';
 export * from './loan-calculator';
 export * from './passport-photo-maker';
 export * from './image-resizer';
+export * from './image-background-changer';
 export * from './convert-all';
 
 // Dedicated Conversion Workspaces

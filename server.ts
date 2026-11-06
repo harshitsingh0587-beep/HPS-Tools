@@ -118,6 +118,26 @@ let siteConfig = {
   creatorHub: 'harshit.hub',
 };
 
+// Simple Sliding Window Rate Limiter
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+function rateLimiter(limit: number, windowMs: number) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+    if (!entry || now > entry.resetTime) {
+      rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
+      return next();
+    }
+    if (entry.count >= limit) {
+      res.status(429).json({ error: 'Too many requests. Please wait a moment before trying again.' });
+      return;
+    }
+    entry.count++;
+    next();
+  };
+}
+
 // Authentication Middleware
 function authenticateUser(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
@@ -158,8 +178,8 @@ function requireAdminRole(req: Request, res: Response, next: NextFunction): void
 
 // --- API ROUTES ---
 
-// 1. Auth: Register (Always creates standard 'user' role)
-app.post('/api/auth/register', (req: Request, res: Response) => {
+// 1. Auth: Register (Always creates standard 'user' role; rate limited to 10 per minute)
+app.post('/api/auth/register', rateLimiter(10, 60000), (req: Request, res: Response) => {
   const { email, name, password } = req.body;
   if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
     res.status(400).json({ error: 'Valid email and password are required.' });
@@ -202,8 +222,8 @@ app.post('/api/auth/register', (req: Request, res: Response) => {
   });
 });
 
-// 2. Auth: Login
-app.post('/api/auth/login', (req: Request, res: Response) => {
+// 2. Auth: Login (Rate limited: 5 attempts per minute to mitigate brute-force attacks)
+app.post('/api/auth/login', rateLimiter(5, 60000), (req: Request, res: Response) => {
   const { email, password } = req.body;
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password are required.' });
@@ -378,13 +398,13 @@ app.delete('/api/user/work/:id', authenticateUser, (req: Request, res: Response)
   res.json({ success: true });
 });
 
-// 11. Project Folder Download Endpoints
-app.get('/api/download/project-zip', (_req: Request, res: Response) => {
+// 11. Project Folder Download Endpoints (Restricted to authenticated Administrators only)
+app.get('/api/download/project-zip', requireAdminRole, (_req: Request, res: Response) => {
   const filePath = path.resolve('public/hps-tools-project.zip');
   res.download(filePath, 'hps-tools-project.zip');
 });
 
-app.get('/api/download/project-tar', (_req: Request, res: Response) => {
+app.get('/api/download/project-tar', requireAdminRole, (_req: Request, res: Response) => {
   const filePath = path.resolve('public/hps-tools-project.tar.gz');
   res.download(filePath, 'hps-tools-project.tar.gz');
 });
@@ -392,6 +412,10 @@ app.get('/api/download/project-tar', (_req: Request, res: Response) => {
 // Helper for intelligent intent recognition when offline or API key is not ready
 function generateSmartFallbackReply(userMsg: string): string {
   const lower = userMsg.toLowerCase().trim();
+
+  if (lower.includes('background') || lower.includes('bg color') || lower.includes('remove background') || lower.includes('change background')) {
+    return `### 🎨 Image Background Colour Changer\nI can help you change or replace the background color of any photo while preserving the subject!\n- **Presets & Custom Color:** Pick from professional studio presets (White, Slate, Navy, Mint, Crimson, Sky Blue, Transparent) or use the custom color wheel.\n- **Precision Controls:** Adjust color tolerance and edge feathering for smooth hair and shoulder lines.\n- **Formats:** Download high-resolution results in JPG or PNG format.\n- Open the **Image Background Colour Changer** (/tools/image-background-changer) to begin!`;
+  }
 
   if (lower.includes('pdf to image') || lower.includes('pdf to png') || lower.includes('pdf to jpg') || (lower.includes('convert') && lower.includes('pdf'))) {
     return `### 📄 Convert PDF to Image\nI can help you convert your PDF documents into high-resolution PNG or JPG images!
@@ -486,6 +510,7 @@ Available tools and features in HPS Tools:
 - Unit Converter (/tools/unit-converter): Length, temperature, area, volume, mass, speed
 - Word Counter (/tools/word-counter): Word, character, reading time, sentence analysis
 - Password Generator (/tools/password-generator): Cryptographically secure random passwords
+- Image Background Colour Changer (/tools/image-background-changer): Change photo backgrounds with color presets and custom picker while preserving subjects
 - Convert All (/tools/convert-all): Universal conversion hub (Word, PowerPoint, PDF, Images)
 
 Guidelines:

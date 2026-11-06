@@ -104,6 +104,17 @@ export const TOOLS_REGISTRY: ToolItem[] = [
     popular: true,
     tags: ['resize', 'image', 'png', 'jpg', 'webp', 'dpi', 'dimensions', 'compress'],
   },
+  {
+    id: 'image-background-changer',
+    name: 'Image Background Colour Changer',
+    description: 'Change the background colour of any portrait or photo to solid studio colours, custom hues, or transparent PNG while preserving the subject.',
+    category: 'Image Tools',
+    path: '/tools/image-background-changer',
+    icon: 'Palette',
+    popular: true,
+    featured: true,
+    tags: ['background', 'colour', 'color', 'change background', 'remove background', 'portrait', 'photo', 'transparent', 'png', 'jpg'],
+  },
 
   // Document Conversion Tools
   {

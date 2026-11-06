@@ -12,6 +12,12 @@
   --hps-border: #E2E8F0;
 }
 
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   background-color: var(--hps-bg);
   color: var(--hps-text);

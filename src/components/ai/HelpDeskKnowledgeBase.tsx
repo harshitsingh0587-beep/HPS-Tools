@@ -113,6 +113,45 @@ const KNOWLEDGE_GUIDES: KnowledgeGuide[] = [
     aiPromptRecommendation: 'Help me make a passport photo',
   },
   {
+    id: 'image-background-changer',
+    title: 'Change Image Background Colour',
+    toolPath: '/tools/image-background-changer',
+    category: 'Photos & Media',
+    summary: 'Replace or tint photo backgrounds with studio colours or transparency while preserving subject details.',
+    estimatedTime: '20 seconds',
+    icon: 'Palette',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Upload Any Photo or Portrait',
+        instruction: 'Drag your image into the dropzone or select from your computer (JPG, PNG, or WebP).',
+      },
+      {
+        stepNumber: 2,
+        title: 'Choose a New Background Colour',
+        instruction: 'Select a preset swatch (White, Navy Blue, Sky Blue, Grey, Transparent) or choose a custom hex colour with the color picker.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Fine-Tune Tolerance & Feathering',
+        instruction: 'Adjust the Color Tolerance slider to eliminate shadow tints. Use Edge Smoothness to keep hair and shoulders natural.',
+      },
+      {
+        stepNumber: 4,
+        title: 'Download Edited Photo',
+        instruction: 'Download your result in high-resolution PNG or JPG with your new background applied.',
+      },
+    ],
+    proTips: [
+      'Use the Eyedropper tool to click on difficult backdrop shades to sample the exact tone.',
+      'PNG format allows complete transparency for graphic design and eCommerce overlays.',
+    ],
+    commonMistakes: [
+      'Setting tolerance too high (>70%) might bleed into light-colored clothes. Keep tolerance between 25-45% for best results.',
+    ],
+    aiPromptRecommendation: 'Change the background colour of this image',
+  },
+  {
     id: 'jpg-to-png',
     title: 'Transcode JPG to Lossless PNG / PNG to JPG',
     toolPath: '/tools/jpg-to-png',
