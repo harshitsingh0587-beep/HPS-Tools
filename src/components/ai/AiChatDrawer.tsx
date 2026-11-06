@@ -201,8 +201,18 @@ export const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
         });
 
         if (response.ok) {
-          const data = await response.json();
-          assistantReply = data.reply || 'Here is how I can help with HPS Tools.';
+          const contentType = (response.headers.get('content-type') || '').toLowerCase();
+          const rawText = await response.text();
+          if (!contentType.includes('text/html') && !rawText.trim().startsWith('<')) {
+            try {
+              const data = JSON.parse(rawText);
+              assistantReply = data.reply || 'Here is how I can help with HPS Tools.';
+            } catch {
+              assistantReply = 'I am available to assist you. Ask me to convert PDF to Image, transcode pictures, calculate loans, or generate secure passwords.';
+            }
+          } else {
+            assistantReply = 'I am available to assist you. Ask me to convert PDF to Image, transcode pictures, calculate loans, or generate secure passwords.';
+          }
         } else {
           assistantReply = 'I am available to assist you. Ask me to convert PDF to Image, transcode pictures, calculate loans, or generate secure passwords.';
         }

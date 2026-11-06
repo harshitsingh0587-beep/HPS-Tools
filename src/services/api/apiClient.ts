@@ -32,7 +32,29 @@ export const apiClient = {
         },
       });
 
-      const data = await res.json().catch(() => ({}));
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      const rawText = await res.text();
+      const isHtml = contentType.includes('text/html') || rawText.trim().startsWith('<');
+
+      if (isHtml) {
+        return {
+          success: false,
+          error: `Endpoint returned HTML (${res.status}). Serverless function or route may be unavailable.`,
+          status: res.status,
+        };
+      }
+
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        return {
+          success: false,
+          error: 'Invalid JSON response from server.',
+          status: res.status,
+        };
+      }
+
       if (!res.ok) {
         return {
           success: false,
@@ -66,7 +88,29 @@ export const apiClient = {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      const rawText = await res.text();
+      const isHtml = contentType.includes('text/html') || rawText.trim().startsWith('<');
+
+      if (isHtml) {
+        return {
+          success: false,
+          error: `Endpoint returned HTML (${res.status}). Serverless function or route may be unavailable.`,
+          status: res.status,
+        };
+      }
+
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        return {
+          success: false,
+          error: 'Invalid JSON response from server.',
+          status: res.status,
+        };
+      }
+
       if (!res.ok) {
         return {
           success: false,
@@ -99,7 +143,29 @@ export const apiClient = {
         },
       });
 
-      const data = await res.json().catch(() => ({}));
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      const rawText = await res.text();
+      const isHtml = contentType.includes('text/html') || rawText.trim().startsWith('<');
+
+      if (isHtml) {
+        return {
+          success: false,
+          error: `Endpoint returned HTML (${res.status}). Serverless function or route may be unavailable.`,
+          status: res.status,
+        };
+      }
+
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        return {
+          success: false,
+          error: 'Invalid JSON response from server.',
+          status: res.status,
+        };
+      }
+
       if (!res.ok) {
         return {
           success: false,

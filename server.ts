@@ -4,6 +4,7 @@ import path from 'path';
 import crypto from 'node:crypto';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -32,6 +33,32 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'hps-tools-secure-session-k
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'HarshitAdmin2026!';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@hpstools.com';
 
+// SMTP Email Delivery Configuration
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587', 10);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_SECURE = process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465';
+const SMTP_FROM = process.env.SMTP_FROM || 'HPS Tools Security <security@hpstools.com>';
+const isEmailConfigured = Boolean(SMTP_HOST && SMTP_USER && SMTP_PASS);
+
+let mailTransporter: nodemailer.Transporter | null = null;
+if (isEmailConfigured) {
+  try {
+    mailTransporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+      },
+    });
+  } catch (err) {
+    console.warn('Failed to initialize nodemailer transporter:', err);
+  }
+}
+
 // In-memory data store for server-side verification and persistence
 interface ServerUser {
   id: string;
@@ -40,6 +67,14 @@ interface ServerUser {
   passwordHash: string;
   role: 'admin' | 'user';
   createdAt: string;
+}
+
+interface PasswordResetToken {
+  token: string;
+  email: string;
+  expiresAt: number;
+  used: boolean;
+  createdAt: number;
 }
 
 interface ServerFeedback {
@@ -104,6 +139,8 @@ const adminUser: ServerUser = {
 
 const users: Map<string, ServerUser> = new Map();
 users.set(adminUser.email.toLowerCase(), adminUser);
+
+const resetTokens: Map<string, PasswordResetToken> = new Map();
 
 const feedbackList: ServerFeedback[] = [];
 const userWorkList: ServerWorkItem[] = [];
@@ -248,6 +285,167 @@ app.post('/api/auth/login', rateLimiter(5, 60000), (req: Request, res: Response)
       role: user.role,
       joinedAt: user.createdAt,
     },
+  });
+});
+
+// Helper to mask email for security (e.g. j***@example.com)
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***';
+  if (local.length <= 2) return `${local[0]}***@${domain}`;
+  return `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
+}
+
+// 2a. Auth: Forgot Password (Rate limited: 5 requests per 15 minutes to prevent email abuse)
+app.post('/api/auth/forgot-password', rateLimiter(5, 15 * 60000), async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email || typeof email !== 'string') {
+    res.status(400).json({ error: 'A valid email address is required.' });
+    return;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const existingUser = users.get(normalizedEmail);
+
+  let resetUrl: string | undefined;
+  let testToken: string | undefined;
+
+  if (existingUser) {
+    // Generate high-entropy, cryptographically secure 64-char single-use token
+    const token = crypto.randomBytes(32).toString('hex');
+    testToken = token;
+    // Expiration: 1 hour (3600,000 ms)
+    const expiresAt = Date.now() + 60 * 60 * 1000;
+
+    // Invalidate any older tokens for this user email
+    for (const [key, val] of resetTokens.entries()) {
+      if (val.email === normalizedEmail) {
+        resetTokens.delete(key);
+      }
+    }
+
+    resetTokens.set(token, {
+      token,
+      email: normalizedEmail,
+      expiresAt,
+      used: false,
+      createdAt: Date.now(),
+    });
+
+    const host = req.get('host') || 'localhost:3000';
+    const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+    resetUrl = `${protocol}://${host}/reset-password?token=${token}`;
+
+    if (mailTransporter && isEmailConfigured) {
+      try {
+        await mailTransporter.sendMail({
+          from: SMTP_FROM,
+          to: normalizedEmail,
+          subject: 'Reset your HPS Tools password',
+          text: `Hello ${existingUser.name},\n\nA password reset request was received for your HPS Tools account.\n\nClick the link below to choose a new password:\n${resetUrl}\n\nThis link will expire in 1 hour and can only be used once.\nIf you did not make this request, you can safely ignore this email.\n\n— HPS Tools Team`,
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+              <h2 style="color: #0f172a; margin-top: 0;">Reset Your Password</h2>
+              <p style="color: #475569; font-size: 14px; line-height: 1.5;">Hello <strong>${existingUser.name}</strong>,</p>
+              <p style="color: #475569; font-size: 14px; line-height: 1.5;">A password reset request was made for your HPS Tools account. Click the button below to set a new password:</p>
+              <div style="margin: 24px 0;">
+                <a href="${resetUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">Reset Password</a>
+              </div>
+              <p style="color: #64748b; font-size: 12px; line-height: 1.4;">This link will expire in <strong>1 hour</strong> and can only be used once.</p>
+              <p style="color: #94a3b8; font-size: 11px; margin-top: 24px; border-top: 1px solid #f1f5f9; padding-top: 12px;">If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            </div>
+          `,
+        });
+        console.log(`[HPS Security] Password reset email dispatched to ${normalizedEmail}`);
+      } catch (sendErr) {
+        console.error('[HPS Security] Failed to deliver password reset email via SMTP:', sendErr);
+      }
+    } else {
+      console.log(`[HPS Security - SMTP Not Configured] Password reset link for ${normalizedEmail}: ${resetUrl}`);
+    }
+  }
+
+  // Consistent generic response to prevent account enumeration
+  res.status(200).json({
+    success: true,
+    message: 'If an account is associated with this email address, a password reset link has been sent.',
+    emailConfigured: isEmailConfigured,
+    diagnostic: !isEmailConfigured
+      ? 'SMTP credentials (SMTP_HOST, SMTP_USER, SMTP_PASS) are not configured in environment variables. In development/testing, you can use the test reset link or inspect the server logs.'
+      : undefined,
+    resetUrl: (!isEmailConfigured && process.env.NODE_ENV !== 'production' && resetUrl) ? resetUrl : undefined,
+    testToken: (!isEmailConfigured && process.env.NODE_ENV !== 'production' && testToken) ? testToken : undefined,
+  });
+});
+
+// 2b. Auth: Verify Password Reset Token
+app.get('/api/auth/verify-reset-token', (req: Request, res: Response) => {
+  const token = (req.query.token as string || '').trim();
+  if (!token) {
+    res.status(400).json({ valid: false, error: 'Password reset token is required.' });
+    return;
+  }
+
+  const record = resetTokens.get(token);
+  if (!record) {
+    res.status(400).json({ valid: false, error: 'Password reset token is invalid or has expired.' });
+    return;
+  }
+
+  if (record.used) {
+    res.status(400).json({ valid: false, error: 'This password reset link has already been used. Please request a new one.' });
+    return;
+  }
+
+  if (Date.now() > record.expiresAt) {
+    resetTokens.delete(token);
+    res.status(400).json({ valid: false, error: 'This password reset link has expired (links expire after 1 hour). Please request a new one.' });
+    return;
+  }
+
+  res.json({
+    valid: true,
+    email: maskEmail(record.email),
+  });
+});
+
+// 2c. Auth: Reset Password (Single-use token consumption; rate limited)
+app.post('/api/auth/reset-password', rateLimiter(5, 15 * 60000), (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword || typeof token !== 'string' || typeof newPassword !== 'string') {
+    res.status(400).json({ error: 'Valid reset token and new password are required.' });
+    return;
+  }
+
+  const record = resetTokens.get(token.trim());
+  if (!record || record.used || Date.now() > record.expiresAt) {
+    res.status(400).json({ error: 'Password reset token is invalid, expired, or has already been used.' });
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    res.status(400).json({ error: 'New password must be at least 6 characters long.' });
+    return;
+  }
+
+  const user = users.get(record.email);
+  if (!user) {
+    res.status(400).json({ error: 'User account associated with this token was not found.' });
+    return;
+  }
+
+  // Update password hash
+  user.passwordHash = hashPassword(newPassword);
+
+  // Single-use: Mark token as consumed and delete
+  record.used = true;
+  resetTokens.delete(token.trim());
+
+  console.log(`[HPS Security] Password successfully reset for account ${record.email}`);
+
+  res.json({
+    success: true,
+    message: 'Your password has been successfully reset. You may now sign in with your new password.',
   });
 });
 

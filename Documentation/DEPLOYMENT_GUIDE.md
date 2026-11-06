@@ -25,12 +25,16 @@ Netlify provides a generous free tier with automated Git CI/CD and global CDN di
    - **Publish directory**: `dist`
 6. Click **Deploy hpstools**.
 
-### SPA Routing on Netlify
-Single Page Applications (SPAs) require all paths (like `/tools/calculator` or `/admin`) to be served by `/index.html`. HPS Tools includes `public/_redirects` out of the box:
+### Netlify Serverless API & SPA Routing
+HPS Tools includes built-in Netlify Functions (`netlify/functions/api.ts`) and full Netlify configuration (`netlify.toml` and `public/_redirects`).
+
+1. **API Requests**: `/api/*` requests are automatically routed to the serverless API handler (`/.netlify/functions/api/:splat`), providing full user registration, login, session tokens, feedback, and admin endpoints.
+2. **Client SPA Routing**: All user-facing routes (e.g. `/tools/calculator`, `/admin`, `/about`) are served by `/index.html`:
 ```text
-/*    /index.html   200
+/api/*    /.netlify/functions/api/:splat    200
+/*        /index.html                       200
 ```
-When Vite builds into `dist`, this file is automatically placed at `dist/_redirects`, ensuring direct links and page refreshes work without 404 errors.
+When Vite builds into `dist`, this file is automatically placed at `dist/_redirects`, ensuring both API endpoints and SPA navigation work seamlessly with zero 404 or JSON parse errors.
 
 ---
 

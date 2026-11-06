@@ -4,6 +4,7 @@ import {
   UserProfile,
   loginWithServer,
   registerWithServer,
+  requestPasswordReset,
   signOutUser,
 } from '../../services/auth/authService';
 
@@ -23,11 +24,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [viewMode, setViewMode] = useState<'signin' | 'signup' | 'forgot-password'>('signin');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotResult, setForgotResult] = useState<{
+    message: string;
+    diagnostic?: string;
+    resetUrl?: string;
+    emailConfigured?: boolean;
+  } | null>(null);
 
   if (!isOpen) return null;
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    if (!email.trim()) {
+      setErrorMessage('Please enter your email address.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await requestPasswordReset(email);
+      if (res.success) {
+        setForgotResult({
+          message: res.message,
+          diagnostic: res.diagnostic,
+          resetUrl: res.resetUrl,
+          emailConfigured: res.emailConfigured,
+        });
+      } else {
+        setErrorMessage(res.error || 'Failed to send reset link.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +72,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setLoading(true);
     try {
-      if (isSignUp) {
+      if (viewMode === 'signup') {
         const res = await registerWithServer(email, name, password);
         if (res.success && res.user) {
           onUserChanged(res.user);

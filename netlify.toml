@@ -1,0 +1,19 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Route /api/* requests to Netlify Functions handler first
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# Client-side SPA fallback for direct URL visits
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
